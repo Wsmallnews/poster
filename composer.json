@@ -9,7 +9,8 @@
         }
     ],
     "require": {
-        "intervention/image": "^2.5"
+        "intervention/image": "~2.0",
+        "guzzlehttp/guzzle": "~5.0|~6.0"
     },
     "autoload": {
         "psr-4": {
