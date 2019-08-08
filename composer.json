@@ -1,0 +1,19 @@
+{
+    "name": "smallnews\/poster",
+    "description": "A make poster package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "smallnews",
+            "email": "1371606921@qq.com"
+        }
+    ],
+    "require": {
+        "intervention/image": "^2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Smallnews\\Poster\\": "src"
+        }
+    }
+}
