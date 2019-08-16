@@ -28,8 +28,6 @@ class Image extends Draw
     }
 
 
-
-
     public function applyToImage () {
         $imgResource = $this->getResource();
 
@@ -37,15 +35,32 @@ class Image extends Draw
             $imgResource->resize($this->width, $this->height);
         }
 
+        if ($this->getOpacity() < 100) {
+            $imgResource->opacity($this->getOpacity());
+        }
+
         $this->image->insert($imgResource, $this->position, $this->x, $this->y);
     }
 
 
     public function getResource () {
+        // print_r($this->path);exit;
+        if (empty($this->path)) {
+            throw new \Exception('draw image 缺少参数 path');
+        }
+
+        if (is_object($this->path)) {
+            if ($this->path instanceof InterventionImage) {
+                return $this->path;
+            }
+            throw new \Exception('图片资源不支持');
+        }
+
         if (is_string($this->path)) {
-            if (!preg_match("/^(http:\/\/|https:\/\/)/", $this->path)) {
-                $resource = (new Client())->get($this->path)->getBody();
-                print_r($resource);exit;
+            if (preg_match("/^(http:\/\/|https:\/\/)/", $this->path)) {
+                $result = (new Client())->get($this->path);
+
+                $resource = $result->getBody();
             } else {
                 $resource = $this->path;
             }
@@ -57,5 +72,9 @@ class Image extends Draw
 
     public function imageManager () {
         return new ImageManager();
+    }
+
+    private function getOpacity() {
+        return abs($this->opacity);
     }
 }
