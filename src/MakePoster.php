@@ -24,6 +24,10 @@ class MakePoster
     }
 
 
+    /**
+     * 全局配置信息
+     * @param array $config 配置
+     */
     public function setConfig (Array $config = []) {
         $this->config = $config;
 
@@ -34,32 +38,44 @@ class MakePoster
 
 
 
+    /**
+     * 初始化底图
+     * @param  array  $init 底图资源
+     * @return 当前对象
+     */
     public function init (Array $init = []) {
         if ($init['path']) {
             // 返回一个背景资源
             $this->image = $this->imageManager()->make($init['path']);
 
-            if ($init['width'] && $init['height']) {
-                $this->image->resize($init['width'], $init['height']);
+            if ($init['width'] || $init['height']) {
+                $this->image->resize($init['width'] ? : null, $init['height'] ? : null);
             }
         } else if ($init['width'] && $init['height']) {
             // 返回一个 画布资源
             $this->image = $this->imageManager()->canvas($init['width'], $init['height']);
         } else {
-            throw new \Exception('Don`t make background base poster');
+            throw new \Exception('No basic picture of poster');
         }
 
         return $this;
     }
 
 
+    /**
+     * 获取 Intervention\Image\ImageManager 对象
+     * @return [type] Intervention\Image\ImageManager
+     */
     public function imageManager () {
         return new ImageManager();
     }
 
 
-    // 增加文本
-    public function addText($text) {
+    /**
+     * 增加一行文本
+     * @param Array 文本配置
+     */
+    public function addText(Array $text) {
         if (is_string($text)) {
             $text = ['string' => $text];
         }
@@ -68,15 +84,22 @@ class MakePoster
     }
 
 
-    // 增加多个文本
-    public function addTexts ($texts) {
+
+    /**
+     * 增加多个文本
+     * @param Array 多个文本配置
+     */
+    public function addTexts (Array $texts) {
         $this->texts = array_merge($this->texts, $texts);
 
         return $this;
     }
 
 
-    // 增加图片
+    /**
+     * 增加一张图片
+     * @param Array 图片资源配置
+     */
     public function addImage ($image) {
         if (is_string($image)) {
             $image = ['path' => $image];
@@ -86,7 +109,10 @@ class MakePoster
     }
 
 
-    // 增加多个图片
+    /**
+     * 增加多张图片
+     * @param Array 多张图片资源配置
+     */
     public function addImages ($images) {
         $this->images = array_merge($this->images, $images);
 
@@ -95,6 +121,10 @@ class MakePoster
 
 
 
+    /**
+     * 将 加入的 文本，图像 绘制到底图
+     * @return [type] [description]
+     */
     public function draw () {
         $this->makeText();
 
@@ -104,7 +134,9 @@ class MakePoster
     }
 
 
-
+    /**
+     * 循环绘制图片
+     */
     public function makeImage() {
         foreach ($this->images as $key => $image) {
             $this->drawContent('image', $image);
@@ -116,6 +148,9 @@ class MakePoster
     }
 
 
+    /**
+     * 循环绘制文字
+     */
     public function makeText () {
         foreach ($this->texts as $key => $text) {
             $this->drawContent('text', $text);
@@ -127,13 +162,23 @@ class MakePoster
     }
 
 
-    public function drawContent ($type, $config) {
+    /**
+     * 调用对应类绘制对应内容
+     * @param  [type] $type          [description]
+     * @param  [type] $contentConfig [description]
+     * @return [type]                [description]
+     */
+    public function drawContent ($type, $contentConfig) {
+        if (is_null($this->image)){
+            throw new \Exception("no draw {$type} methods");
+        }
+
         $className = "Smallnews\\Poster\\Draws\\" . ucfirst($type);
         if (class_exists($className)) {
-            $drawContent = new $className($this->image, $config);
+            $drawContent = new $className($this->image, $contentConfig);
             $drawContent->applyToImage();
         } else if (method_exists($this, 'draw' . ucfirst($type))) {
-            $this->{'draw' . ucfirst($type)}($config);
+            $this->{'draw' . ucfirst($type)}($contentConfig);
 
         } else {
             throw new \Exception("no draw {$type} methods");

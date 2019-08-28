@@ -18,9 +18,6 @@ class Image extends Draw
 
 
     public function __construct (InterventionImage $image, Array $config) {
-        // 默认字体
-        $this->fontFile = dirname(__FILE__).'/../fonts/pingfang.ttf';
-
         // 海报底图资源
         $this->image = $image;
 
@@ -28,11 +25,14 @@ class Image extends Draw
     }
 
 
+    /**
+     * 将图片绘制在 image 底图资源上
+     */
     public function applyToImage () {
         $imgResource = $this->getResource();
 
-        if ($this->width && $this->height) {
-            $imgResource->resize($this->width, $this->height);
+        if ($this->width || $this->height) {
+            $imgResource->resize($this->width ? : null, $this->height ? : null);
         }
 
         if ($this->getOpacity() < 100) {
@@ -43,26 +43,22 @@ class Image extends Draw
     }
 
 
+    /**
+     * 获取传入的图片资源
+     * @return InterventionImage
+     */
     public function getResource () {
-        // print_r($this->path);exit;
         if (empty($this->path)) {
             throw new \Exception('draw image 缺少参数 path');
         }
 
-        if (is_object($this->path)) {
-            if ($this->path instanceof InterventionImage) {
-                return $this->path;
-            }
-            throw new \Exception('图片资源不支持');
-        }
+        $resource = $this->path;
 
         if (is_string($this->path)) {
             if (preg_match("/^(http:\/\/|https:\/\/)/", $this->path)) {
                 $result = (new Client())->get($this->path);
 
                 $resource = $result->getBody();
-            } else {
-                $resource = $this->path;
             }
         }
 
@@ -70,10 +66,18 @@ class Image extends Draw
     }
 
 
+    /**
+     * 获取 Intervention\Image\ImageManager 对象
+     * @return Intervention\Image\ImageManager
+     */
     public function imageManager () {
         return new ImageManager();
     }
 
+
+    /**
+     * 获取透明度
+     */
     private function getOpacity() {
         return abs($this->opacity);
     }

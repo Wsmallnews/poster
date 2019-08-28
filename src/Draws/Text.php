@@ -43,7 +43,9 @@ class Text extends Draw
     }
 
 
-
+    /**
+     * 将图片绘制在 image 底图资源上
+     */
     public function applyToImage () {
         $lines = $this->getLines();
 
@@ -51,6 +53,11 @@ class Text extends Draw
     }
 
 
+
+    /**
+     * 获取断行文本
+     * @return Array  断行文本
+     */
     public function getLines () {
         if ($this->isHidden) {
             $lines = $this->getBreakLines();
@@ -62,6 +69,10 @@ class Text extends Draw
     }
 
 
+    /**
+     * 绘制文本
+     * @param  Array $lines 文本内容
+     */
     public function drawText($lines) {
         $x = $this->x;
         $y = $this->y;
