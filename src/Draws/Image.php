@@ -11,7 +11,7 @@ class Image extends Draw
     protected $path = '';
     protected $width = 0;
     protected $height = 0;
-    protected $position = 'bottom-left';
+    protected $position = 'top-left';
     protected $x = 0;
     protected $y = 0;
     protected $opacity = 100;
@@ -52,7 +52,15 @@ class Image extends Draw
             throw new \Exception('draw image 缺少参数 path');
         }
 
-        $resource = $this->path;
+        if (is_object($this->path)) {
+            if ($this->path instanceof InterventionImage) {
+                return $this->path;
+            } else {
+                throw new \Exception('Image format is not supported');
+            }
+        }
+
+        // $resource = $this->path;
 
         if (is_string($this->path)) {
             if (preg_match("/^(http:\/\/|https:\/\/)/", $this->path)) {
