@@ -13,7 +13,7 @@ class MakePoster
 
     protected $images = [];
 
-    protected $image = null;
+    public $image = null;
 
     public function __construct (Array $config = []) {
         $this->setConfig($config);
@@ -186,18 +186,11 @@ class MakePoster
     }
 
 
-    // public function drawImage($image) {
-    //     $imgResource = $this->imageManager()->make($image['path']);
-    //
-    //     if ($image['width'] && $image['height']) {
-    //         $imgResource->resize($image['width'], $image['height']);
-    //     }
-    //
-    //     $this->image->insert($imgResource, $image['position'], $image['x'], $image['y']);
-    // }
 
-
-
+    /**
+     * 绘制水印，并保存图片到指定位置
+     * @param  string $path          图片路径
+     */
     public function save($path = '') {
         // 将 未 绘制的 文字，图片进行绘制
         $this->draw();

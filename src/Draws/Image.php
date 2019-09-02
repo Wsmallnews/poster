@@ -60,7 +60,7 @@ class Image extends Draw
             }
         }
 
-        // $resource = $this->path;
+        $resource = $this->path;
 
         if (is_string($this->path)) {
             if (preg_match("/^(http:\/\/|https:\/\/)/", $this->path)) {
