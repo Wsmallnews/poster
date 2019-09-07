@@ -1,6 +1,7 @@
 {
-    "name": "smallnews\/poster",
+    "name": "smallnews/poster",
     "description": "A make poster package",
+    "keywords": ["poster", "image", "gd", "imagick", "laravel", "watermark"],
     "license": "MIT",
     "authors": [
         {
