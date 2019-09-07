@@ -13,6 +13,7 @@ class Text extends Draw
     protected $color = '#FFFFFF';
     protected $size = 24;
     protected $fontFile = '';
+    protected $line = [];           // 划线
     protected $align = 'left';
     protected $valign = 'top';
     protected $lineHeight = 24;
@@ -27,7 +28,17 @@ class Text extends Draw
         // 海报底图资源
         $this->image = $image;
 
-        Parent::initConfig($config);
+        Parent::initConfig($config, function ($value, $name) {
+            $value = in_array($value, ['through', 'overline', 'underline']) ? $value : [];
+            if ($value && $name == 'line') {
+                return [        // 颜色默认跟随字体颜色
+                    'type' => $value,
+                    // 'width' => 1         // gd 库不支持 绘制 width
+                ];
+            }
+
+            return $value;
+        });
     }
 
 
@@ -76,6 +87,9 @@ class Text extends Draw
     public function drawText($lines) {
         $x = $this->x;
         $y = $this->y;
+        $text_line = $this->line;
+        $fontcolor = $this->color;
+
         $line_height = $this->lineHeight;
 
         $callback = function ($font) {
@@ -87,10 +101,69 @@ class Text extends Draw
         };
 
         foreach ($lines as $key => $text) {
+            if ($text_line && $text_line['type']) {
+                // 重新计算了 x,y，
+                extract($this->getTextLine($x, $y, $text));
+            }
+
+            // 绘制文字
             $this->image->text($text, $x, $y, $callback);
+
+            // 如果需要划线，划线， 保证 线在文字上方
+            if ($text_line && $text_line['type']) {
+                $this->image->line($line_start_x, $line_start_y, $line_end_x, $line_end_y, function ($draw) use ($text_line, $fontcolor) {
+                    $color = $text_line['color'] ?? $fontcolor;
+                    $draw->color($color);
+                });
+            }
+
             $y = $y + $line_height;
         }
     }
+
+
+    // 文字
+    public function getTextLine ($x, $y, $text) {
+        $text_line = $this->line;
+
+        $position = imagettfbbox($this->getPointSize(), 0, $this->fontFile, $text);
+        $text_width = abs($position[4] - $position[6]);
+        $text_height = abs($position[1] - $position[7]);
+
+        switch ($text_line['type']) {
+            case 'through':
+                $line_start_x = $x;
+                $line_start_y = $y + abs($text_height / 2);
+                $line_end_x = $x + $text_width;
+                $line_end_y = $y + abs($text_height / 2);
+                break;
+            case 'overline':
+                $line_start_x = $x;
+                $line_start_y = $y;
+                $line_end_x = $x + $text_width;
+                $line_end_y = $y;
+
+                // 防止上划线压住文字，向上移动一个像素，下面空出一个像素，共 2 像素
+                $line_start_y = $line_start_y - 1;
+                $line_end_y = $line_end_y - 1;
+                $y = $y + 1;
+                break;
+            case 'underline':
+                $line_start_x = $x;
+                $line_start_y = $y + abs($text_height);
+                $line_end_x = $x + $text_width;
+                $line_end_y = $y + abs($text_height);
+
+                // 防止下划线压住文字，向下移动一个像素，下面空出一个像素，共 2 像素
+                $line_start_y = $line_start_y + 1;
+                $line_end_y = $line_end_y + 1;
+                $y = $y + 1;
+                break;
+        }
+
+        return compact('x', 'y', 'line_start_x', 'line_start_y', 'line_end_x', 'line_end_y');
+    }
+
 
 
     /**

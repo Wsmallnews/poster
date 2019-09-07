@@ -18,7 +18,7 @@ class MakePoster
     public function __construct (Array $config = []) {
         $this->setConfig($config);
 
-        if ($config['init']) {
+        if (isset($config['init'])) {
             return $this->init($config['init']);
         }
     }
@@ -49,7 +49,7 @@ class MakePoster
             $this->image = $this->imageManager()->make($init['path']);
 
             if ($init['width'] || $init['height']) {
-                $this->image->resize($init['width'] ? : null, $init['height'] ? : null);
+                $this->image->resize($init['width'] ? : null, $init['height'] ?? null);
             }
         } else if ($init['width'] && $init['height']) {
             // 返回一个 画布资源

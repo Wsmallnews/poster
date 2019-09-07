@@ -31,11 +31,15 @@ class Draw implements ContractDraw
      * 将内容配置设置到类属性
      * @param  Array $config 配置信息
      */
-    protected function initConfig (Array $config) {
+    protected function initConfig (Array $config, \Closure $callback = null) {
         foreach ($config as $key => $value) {
             $protectName = $this->camelize($key);
             if (property_exists($this, $protectName)) {
-                $this->{$protectName} = $value;
+                if (is_array($this->{$protectName}) && !is_array($value) && $callback) {
+                    $this->{$protectName} = $callback($value, $protectName);
+                } else {
+                    $this->{$protectName} = $value;
+                }
             }
         }
     }
