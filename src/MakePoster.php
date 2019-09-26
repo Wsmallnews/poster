@@ -13,6 +13,8 @@ class MakePoster
 
     protected $images = [];
 
+    protected $tagGroups = [];
+
     public $image = null;
 
     public function __construct (Array $config = []) {
@@ -97,6 +99,31 @@ class MakePoster
 
 
     /**
+     * 增加一个标签组
+     * @param Array 标签组配置
+     */
+    public function addTagGroup(Array $tagGroup) {
+        if (is_string($tagGroup)) {
+            $tagGroup = ['tags' => $tagGroup];
+        }
+
+        return $this->addTagGroups([$tagGroup]);
+    }
+
+
+
+    /**
+     * 增加多个标签组
+     * @param Array 多个标签组配置
+     */
+    public function addTagGroups (Array $tagGroups) {
+        $this->tagGroups = array_merge($this->tagGroups, $tagGroups);
+
+        return $this;
+    }
+
+
+    /**
      * 增加一张图片
      * @param Array 图片资源配置
      */
@@ -130,6 +157,7 @@ class MakePoster
 
         $this->makeImage();
 
+        $this->makeTagGroup();
         return $this;
     }
 
@@ -163,6 +191,20 @@ class MakePoster
 
 
     /**
+     * 循环绘制标签
+     */
+    public function makeTagGroup () {
+        foreach ($this->tagGroups as $key => $tagGroup) {
+            $this->drawContent('tagGroup', $tagGroup);
+
+            unset($this->tagGroups[$key]);      // 绘制过的 标签组 移除待处理数组
+        }
+
+        return $this;
+    }
+
+
+    /**
      * 调用对应类绘制对应内容
      * @param  [type] $type          [description]
      * @param  [type] $contentConfig [description]
@@ -170,7 +212,7 @@ class MakePoster
      */
     public function drawContent ($type, $contentConfig) {
         if (is_null($this->image)){
-            throw new \Exception("no draw {$type} methods");
+            throw new \Exception("No basic picture of poster");
         }
 
         $className = "Smallnews\\Poster\\Draws\\" . ucfirst($type);
